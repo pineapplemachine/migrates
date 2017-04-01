@@ -10,8 +10,8 @@ To install migrates as a dependency so that it can be imported in migration
 scripts, run `pip install migrates` or, alternatively, download this repository
 and run `pip install .` in its root directory.
 
-To make migrates usable as a command line tool on unix platforms, add this line
-to your bash profile:
+To make migrates usable as a command line tool on unix platforms, you can add
+this line to your bash profile:
 
 ``` text
 alias migrates="python -m migrates.__main__"

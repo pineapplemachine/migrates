@@ -15,6 +15,16 @@ general_options = """
         Where changes would normally be made to data in Elasticsearch, a
         description of those changes is given and Elasticsearch data is
         not modified.
+    -y, --yes
+        Omit confirmation prompts and just go ahead with things.
+    -v, --verbose
+        Output more information than usual about what migrates is doing.
+    -V, --version
+        Display migrates version and exit.
+    --log
+        Path to a file to log output to."""
+
+migration_options = """
     -l, --detail
         Specifies one or more index and template patterns that are of
         particular interest. When migration affects documents in an
@@ -31,15 +41,7 @@ general_options = """
     -r, --restore-path
         Path to write files to that can be used to restore Elasticsearch
         state in case of a migration failure. Defaults to the directory
-        that the migrates script is located in.
-    -y, --yes
-        Omit confirmation prompts and just go ahead with things.
-    -v, --verbose
-        Output more information than usual about what migrates is doing.
-    -V, --version
-        Display migrates version and exit.
-    --log
-        Path to a file to log output to."""
+        that the migrates script is located in."""
 
 general = """
 Usage:
@@ -108,8 +110,10 @@ Description:
     according to the migration history found in Elasticsearch, have never
     been run.) Pending migrations are run in ascending timestamp order.
 
+Migration Options: %s
+
 General Options: %s
-""" % general_options
+""" % (migration_options, general_options)
 
 reindex = """
 Usage:
@@ -132,8 +136,10 @@ Description:
     When "=>" is not present, documents are reindexed back into the same
     index that they came from.
 
+Migration Options: %s
+
 General Options: %s
-""" % general_options
+""" % (migration_options, general_options)
 
 history = """
 Usage:
