@@ -6,6 +6,10 @@ and is distributed under the
 [GNU GPL v3.0](https://github.com/pineapplemachine/migrates/blob/master/LICENSE)
 license.
 
+Though migrates is designed such that a failed operation should never cause
+irrecoverable data loss, _please don't take my word for it_. If your data is
+important then back it up often, and certainly do so before using migrates.
+
 ## Setup
 
 To install migrates as a dependency so that it can be imported in migration
