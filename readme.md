@@ -9,8 +9,8 @@ license.
 ## Setup
 
 To install migrates as a dependency so that it can be imported in migration
-scripts, run `pip install migrates` or, alternatively, download this repository
-and run `pip install .` in its root directory.
+scripts, run `pip install migrates` (SOON!) or, alternatively, download this
+repository and run `pip install .` in its root directory.
 
 To make migrates usable as a command line tool on Unix platforms, you can add
 this line to your bash profile:
