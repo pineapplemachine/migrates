@@ -82,6 +82,8 @@ Commands:
         ensure that, if something breaks, data will still be
         recoverable. This command can be used to remove old recovery
         files.
+    remove_history
+        Remove migrates' migration history data from Elasticsearch.
     remove_dummies
         Intermediate "dummy" indexes are created during the migration
         process and may sometimes end up sticking around. This command
@@ -255,6 +257,21 @@ Cleanup Options:
 General Options: %s
 """ % general_options
 
+remove_history = """
+Usage:
+    migrates remove_history <options...>
+
+Examples:
+    migrates remove_history
+
+Description:
+    Remove migrates' migration history index from Elasticsearch.
+    Migration history is stored in the "migrates_history" index unless
+    otherwise specified.
+
+General Options: %s
+""" % general_options
+
 remove_dummies = """
 Usage:
     migrates remove_dummies <options...>
@@ -303,5 +320,7 @@ commands = {
     'restore_indexes': restore_indexes,
     'restore_history': restore_history,
     'restore_cleanup': restore_cleanup,
-    'help': help
+    'remove_history': remove_history,
+    'remove_dummies': remove_dummies,
+    'help': help,
 }

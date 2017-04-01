@@ -435,6 +435,27 @@ def restore_cleanup(args):
 
 
 
+def remove_history(args):
+    if not args.enforce_command_args(0):
+        return
+    logger = args.get_logger()
+    history = args.options.history_index
+    if args.options.dry:
+        logger.log('Previewing migration history removal.')
+    if not logger.confirm('Remove migration history index "%s"?', history):
+        logger.log('Exiting without removing migration history.')
+        return
+    connection = args.get_connection()
+    if connection.indices.exists(history):
+        logger.log('Removing migration history index "%s".', history)
+        if not args.options.dry:
+            connection.indices.delete(history)
+    else:
+        logger.log('Migration history "%s" does not exist.', history)
+    logger.log('Finished removing migration history.')
+    
+
+
 def remove_dummies(args):
     if not args.enforce_command_args(0):
         return
@@ -471,6 +492,7 @@ commands = {
     'restore_indexes': restore_indexes,
     'restore_history': restore_history,
     'restore_cleanup': restore_cleanup,
+    'remove_history': remove_history,
     'remove_dummies': remove_dummies,
     'help': show_help,
 }
