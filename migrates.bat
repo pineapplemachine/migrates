@@ -1,0 +1,1 @@
+python -m migrates.__main__ %*
