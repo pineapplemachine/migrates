@@ -171,6 +171,7 @@ Usage:
 
 Examples:
     migrates migrations --host 192.0.2.10:9200 --path my/migrations/path
+    migrates migrations --pending --path my/migrations/path
 
 Description:
     List and describe the migrations known by migrates.
@@ -237,6 +238,7 @@ Usage:
     migrates restore_cleanup <options...>
 
 Examples:
+    migrates restore_cleanup
     migrates restore_cleanup --older-than 2000-01-01
 
 Description:
@@ -262,7 +264,7 @@ Usage:
     migrates remove_history <options...>
 
 Examples:
-    migrates remove_history
+    migrates remove_history --host 192.0.2.10:9200
 
 Description:
     Remove migrates' migration history index from Elasticsearch.
@@ -277,7 +279,7 @@ Usage:
     migrates remove_dummies <options...>
 
 Examples:
-    migrates remove_dummies
+    migrates remove_dummies --host 192.0.2.10:9200
 
 Description:
     Intermediate "dummy" indexes are created during the migration
@@ -304,7 +306,8 @@ Description:
     Show information and usage instructions for a command, or general usage
     when no command is given.
     The recognized commands are "run", "reindex", "history", "migrations",
-    "restore_templates", "restore_indexes", "restore_history", and "help".
+    "restore_templates", "restore_indexes", "restore_history",
+    "restore_cleanup", "remove_history", "remove_dummies", and "help".
 
 General Options: %s
 """ % general_options
