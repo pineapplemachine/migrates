@@ -142,10 +142,51 @@ goes so wrong migrates should tell you how to fix it.
 The `remove_*` commands can be used to remove Elasticsearch data that migrates
 creates.
 
+### Options
+
+Here are listed some of the most important options. For more information and
+for a complete listing, please using `migrates help <command>`.
+Note that some options are not applicable to all commands.
+
+#### host
+
+The `--host` option is for specifying one or more Elasticsearch hosts to operate
+on. If no hosts are specified, migrates defaults to `127.0.0.1:9200`.
+
+#### path
+
+One or more paths to either Python package directories or individual Python
+files can be specified using the `--path` option.
+These modules will be imported so that any migrations that they register
+can be recognized and handled by migrates. For example, if you implemented your
+migrations in a `my_migrations.py` script, you would want to run something like
+`migrates run --path path/to/my_migrations.py`.
+
+#### dry
+
+The `--dry` flag indicates that migrates should do a dry run, where it reports
+everything that would happen during a normal run, without actually modifying
+any data. Every command that would normally modify data respects the `--dry`
+flag, not only `run`.
+
+#### detail
+
+The `--detail` option takes one or more pattern strings and when, during
+migration, a template or index name matches any of the patterns given here,
+extra information will be given about the changes that are taking place.
+Templates matching a pattern will have their complete original and updated
+contents outputted, and one document per index and document type will also
+have the original and updated versions outputted when the containing index
+matches any of the patterns.
+To show detailed information about changes to all templates and indexes,
+you can run `migrates run --detail *`.
+
+### Commands
+
 For a complete explanation of the commands and the options they accept, please
 use `migrates help <command>`.
 
-### help
+#### help
 
 Show information and usage instructions for a command, or general usage
 when no command is given.
@@ -155,7 +196,7 @@ migrates help
 migrates help run
 ```
 
-### run
+#### run
 
 When a list of migration names is explicitly given, those migrations
 are run in the order they were provided.
@@ -169,7 +210,7 @@ migrates run --host 192.0.2.10:9200 --path my/migrations/path
 migrates run my_migration_name --dry --path my/migrations/path
 ```
 
-### reindex
+#### reindex
 
 Reindex the contents of an index or indexes, optionally to a different
 destination index than where the documents were originally located.
@@ -188,7 +229,7 @@ migrates reindex "index_prefix_*"
 migrates reindex my_index a_index=>b_index --host 192.0.2.10:9200 --dry
 ```
 
-### history
+#### history
 
 Describe the migrations that have been applied to Elasticsearch data
 according to the history index that migrates maintains.
@@ -205,7 +246,7 @@ migrates history 2012-01-01
 migrates history 2012-02-28T10:00:00Z 2012-04-01T13:00:00:00Z
 ```
 
-### migrations
+#### migrations
 
 List and describe the migrations known by migrates.
 
@@ -214,7 +255,7 @@ migrates migrations --host 192.0.2.10:9200 --path my/migrations/path
 migrates migrations --pending --path my/migrations/path
 ```
 
-### restore_templates
+#### restore_templates
 
 Load templates from a json file and update the templates currently in
 Elasticsearch to reflect them.
@@ -225,7 +266,7 @@ migration, if normal recovery fails or is prematurely terminated.
 migrates restore_templates my/templates.json
 ```
 
-### restore_indexes
+#### restore_indexes
 
 Given a json file describing indexes that were affected by a recent
 migration attempt, restore documents from dummy indexes back to their
@@ -237,7 +278,7 @@ migration, if normal recovery fails or is prematurely terminated.
 migrates restore_indexes my/indexes.json
 ```
 
-### restore_history
+#### restore_history
 
 Load migration history information from a json file and update
 migrates' history index in Elasticsearch to include that data.
@@ -248,7 +289,7 @@ migration, if normal recovery fails or is prematurely terminated.
 migrates restore_history my/history.json
 ```
 
-### restore_cleanup
+#### restore_cleanup
 
 Clean up old recovery files that are written at the beginning of
 migration to be used to restore Elasticsearch state in case of a
@@ -259,7 +300,7 @@ migrates restore_cleanup
 migrates restore_cleanup --older-than 2000-01-01
 ```
 
-### remove_history
+#### remove_history
 
 Remove migrates' migration history index from Elasticsearch.
 Migration history is stored in the "migrates_history" index unless
@@ -269,7 +310,7 @@ otherwise specified.
 migrates remove_history --host 192.0.2.10:9200
 ```
 
-### remove_dummies
+#### remove_dummies
 
 Intermediate "dummy" indexes are created during the migration
 process and, unless otherwise specified, removed at the end of the
