@@ -6,8 +6,6 @@ import elasticsearch
 from elasticsearch import helpers as eshelpers
 
 import migrates
-from migrates.batch import Batch
-from migrates.logger import Logger
 
 
 
@@ -51,7 +49,7 @@ def remove_test_data(connection):
         pass
 
 def insert_test_data(connection):
-    with Batch(connection, Logger()) as batch:
+    with migrates.Batch(connection, migrates.Logger()) as batch:
         for i in xrange(0, 1200):
             batch.add({
                 '_op_type': 'index',

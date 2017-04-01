@@ -36,14 +36,24 @@ class Arguments(object):
         self.args = args
         # Trailing options and flags, e.g. "migrates run [--dry]"
         self.options = options
+        # Persistent Elasticsearch instance.
+        self.connection = None
         # Persistent Logger instance.
         self.logger = None
     
     def get_connection(self):
-        if self.options.host is None:
-            return elasticsearch.Elasticsearch()
-        else:
-            return elasticsearch.Elasticsearch(self.options.host)
+        if self.connection is None:
+            logger = self.get_logger()
+            if not self.options.host:
+                self.connection = elasticsearch.Elasticsearch()
+                logger.log('Acquired connection to local Elasticsearch host.')
+            else:
+                self.connection = elasticsearch.Elasticsearch(self.options.host)
+                logger.log('Acquired connection to Elasticsearch host%s %s.',
+                    '' if len(self.options.host) == 1 else 's',
+                    ', '.join(self.options.host)
+                )
+        return self.connection
     
     def get_logger(self):
         if self.logger is None:
@@ -182,7 +192,7 @@ def __main__(args=None):
         args = Arguments.parse()
     if args.options.version:
         version(args)
-    elif args.command is None:
+    elif args.command is None or args.command not in commands:
         print usage.general
     else:
         commands[args.command](args)
@@ -248,6 +258,9 @@ def reindex(args):
         migration = migrates.Migration.reindex(index, target)
         migrations.append(migration)
         mig.add(migration)
+    if not logger.confirm('Proceed with %s reindex actions?', len(migrations)):
+        logger.log('Exiting without reindexing.')
+        return
     mig.migrate(migrations)
     logger.log('Finished reindexing.')
 
@@ -439,13 +452,13 @@ def remove_history(args):
     if not args.enforce_command_args(0):
         return
     logger = args.get_logger()
+    connection = args.get_connection()
     history = args.options.history_index
     if args.options.dry:
         logger.log('Previewing migration history removal.')
     if not logger.confirm('Remove migration history index "%s"?', history):
         logger.log('Exiting without removing migration history.')
         return
-    connection = args.get_connection()
     if connection.indices.exists(history):
         logger.log('Removing migration history index "%s".', history)
         if not args.options.dry:
