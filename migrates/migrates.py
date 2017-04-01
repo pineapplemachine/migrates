@@ -2,6 +2,8 @@
 This module implements migrates' actual migration process.
 """
 
+from __future__ import division
+
 import sys, os, time, re, copy, datetime, collections, json
 import elasticsearch
 from elasticsearch import helpers as eshelpers
@@ -12,7 +14,8 @@ from detail import MigratesIndexDetail
 
 
 
-__version__ = (1, 0, 0)
+__version__ = (0, 1, 0)
+__versionstr__ = '.'.join(str(i) for i in __version__)
 
 
 
@@ -126,7 +129,7 @@ class Migrates(object):
     
     def __init__(
         self, connection=None, logger=None, dry=False,
-        detail=None, keep_dummies=False, restore_path='',
+        detail=None, keep_dummies=False, restore_path=None,
         history_template=default_history_template,
         history_index=default_history_index,
         history_doc_type=default_history_doc_type,
@@ -165,16 +168,21 @@ class Migrates(object):
         # Will represent a set of migration names which are to be processed.
         self.migrations = None
         # Paths to files recorded in case the information is needed for recovery.
-        path_date = self.timestamp.strftime('%Y%m%d%H%M%S')
-        self.restore_templates_path = os.path.join(
-            restore_path, 'migrates.templates.' + path_date + '.json'
-        )
-        self.restore_indexes_path = os.path.join(
-            restore_path, 'migrates.indexes.' + path_date + '.json'
-        )
-        self.restore_migrations_path = os.path.join(
-            restore_path, 'migrates.migrations.' + path_date + '.json'
-        )
+        if restore_path is None:
+            self.restore_templates_path = None
+            self.restore_indexes_path = None
+            self.restore_migrations_path = None
+        else:
+            path_date = self.timestamp.strftime('%Y%m%d%H%M%S')
+            self.restore_templates_path = os.path.join(
+                restore_path, 'migrates.templates.' + path_date + '.json'
+            )
+            self.restore_indexes_path = os.path.join(
+                restore_path, 'migrates.indexes.' + path_date + '.json'
+            )
+            self.restore_migrations_path = os.path.join(
+                restore_path, 'migrates.migrations.' + path_date + '.json'
+            )
     
     def batch(self, *args, **kwargs):
         """Get a batch object for handling bulk actions."""
@@ -318,16 +326,25 @@ class Migrates(object):
         }
     
     def write_original_templates(self):
+        if self.restore_templates_path is None:
+            self.verbose('Skipping writing original template data.')
+            return
         self.log('Writing original template data to path "%s".', self.restore_templates_path)
         with open(self.restore_templates_path, 'wb') as output_file:
             json.dump(self.original_templates, output_file)
     
     def write_affected_indexes(self):
+        if self.restore_indexes_path is None:
+            self.verbose('Skipping writing affected index information.')
+            return
         self.log('Writing affected index information to path "%s".', self.restore_indexes_path)
         with open(self.restore_indexes_path, 'wb') as output_file:
             json.dump(list(self.affected), output_file)
     
     def write_pending_migrations(self):
+        if self.restore_migrations_path is None:
+            self.verbose('Skipping writing migration information.')
+            return
         self.log('Writing migration information to path "%s".', self.restore_migrations_path)
         migrations = [
             self.migration_action(migration) for migration in self.migrations
@@ -711,9 +728,9 @@ class Migrates(object):
         if seconds is None:
             seconds = max(5, min(20, len(self.affected)))
         self.log('Waiting for %d seconds...', seconds)
-        step = max(1, seconds / 10)
+        step = max(1, seconds // 10)
         left = seconds % step
-        for _ in range(seconds / step):
+        for _ in range(seconds // step):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(step)

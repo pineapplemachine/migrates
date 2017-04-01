@@ -13,6 +13,13 @@ try:
 except ImportError:
     colors = False
 
+# Make confirmation prompts work for both Python 2 and Python 3
+# http://stackoverflow.com/a/21731110/3478907
+try:
+    input = raw_input
+except NameError:
+    pass
+
 class Logger(object):
     """
     For logging messages to the console and, optionally, to a log file.
@@ -97,5 +104,5 @@ class Logger(object):
             return True
         else:
             formatted = text % args if args else text
-            value = raw_input(formatted + ' (y/n) ')
+            value = input(formatted + ' (y/n) ')
             return value == 'y' or value == 'Y'

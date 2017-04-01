@@ -177,7 +177,9 @@ class Arguments(object):
 
 
 
-def __main__(args):
+def __main__(args=None):
+    if args is None:
+        args = Arguments.parse()
     if args.options.version:
         version(args)
     elif args.command is None:
@@ -476,4 +478,4 @@ commands = {
 
 
 if __name__ == '__main__':
-    __main__(Arguments.parse())
+    __main__()

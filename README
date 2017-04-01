@@ -1,0 +1,44 @@
+migrates
+========
+
+The migrates tool offers a solution for migrating data stored in Elasticsearch.
+
+More info coming soon - this repo is still under construction!
+
+Setup
+-----
+
+To install migrates as a dependency so that it can be imported in migration
+scripts, run `pip install migrates` or, alternatively, download this repository
+and run `pip install .` in the root directory.
+
+To make migrates usable as a command line tool, 
+
+How To
+------
+
+The biggest reason to use migrates is its support for migrations, which are
+implemented as Python classes. They define ways for Elasticsearch templates
+and documents to be modified as part of that migration via their
+`transform_templates` and `transform_documents` methods.
+
+Here's an example of a simple migration:
+
+    import migrates
+    
+    @migrates.register(
+        name='migration_test',
+        date='2000-01-01',
+        description='This is an example migration to square `x` and put it in `y`.'
+    )
+    class migration_test(object):
+        @staticmethod
+        def transform_documents():
+            def transform(doc):
+                doc['_source']['x'] = doc['_source']['y'] ** 2
+                return doc
+            return {
+                'migrates_test_*': {'*': transform}
+            }
+
+
