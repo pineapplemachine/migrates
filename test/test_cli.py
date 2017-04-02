@@ -2,11 +2,13 @@
 This is an automated test for verifying CLI behavior in several cases.
 """
 
-import sys, re, subprocess
+import sys, os, inspect, re, subprocess
 import elasticsearch
 import migrates
 
 logger = migrates.Logger()
+
+test_path = os.path.abspath(inspect.stack()[0][1])
 
 
 
@@ -92,19 +94,19 @@ def __main__():
     original_templates = mig.get_templates()
     
     logger.log('Testing migration registration and listing.')
-    migrations = call('migrations --path %s' % sys.argv[0])
+    migrations = call('migrations --path %s' % test_path)
     assert migrations_text in migrations
     
     logger.log('Testing history removal, recording, and listing.')
     call('remove_history -y')
     assert no_history_text in call('history')
-    run_migration = call('run --path %s -y' % sys.argv[0])
+    run_migration = call('run --path %s -y' % test_path)
     assert re.match(new_history_regex, call('history'))
     call('remove_history -y')
     assert no_history_text in call('history')
     
     logger.log('Testing history when running specified migrations.')
-    call('run migration_1 migration_2 --path %s -y' % sys.argv[0])
+    call('run migration_1 migration_2 --path %s -y' % test_path)
     assert re.match(partial_history_regex, call('history'))
     call('remove_history -y')
     assert no_history_text in call('history')
