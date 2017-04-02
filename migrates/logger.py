@@ -2,7 +2,7 @@
 This module implements the logger used by migrates.
 """
 
-import os, sys, traceback, datetime
+import os, sys, traceback, time, datetime
 
 # Use coloring to prettify the log if colorama is available.
 # Since the colors aren't essential, just log boring style-less text
@@ -25,8 +25,9 @@ class Logger(object):
     For logging messages to the console and, optionally, to a log file.
     """
     
-    def __init__(self, path=None, verbose=False, yes=False):
+    def __init__(self, path=None, verbose=False, quiet=False, yes=False):
         self.verbose = verbose
+        self.quiet = quiet
         self.yes = yes
         self.path = None
         self.output_file = None
@@ -49,13 +50,19 @@ class Logger(object):
             os.close(self.output_file)
             self.output_file = None
     
-    def log(self, text, *args):
+    def show(self, stdout, text, *args):
         """Log a line of text."""
-        formatted = text % args if args else text
-        print(formatted)
+        if stdout or self.output_file is not None:
+            formatted = text % args if args else text
+        if stdout:
+            print(formatted)
         if self.output_file is not None:
             self.output_file.write(formatted)
             self.output_file.write('\n')
+        
+    def log(self, text, *args):
+        """Log a line of text."""
+        self.show(not self.quiet, text, *args)
     
     def debug(self, text, *args):
         """
@@ -65,7 +72,7 @@ class Logger(object):
         if self.verbose:
             if colors:
                 text = colorama.Fore.CYAN + text + colorama.Style.RESET_ALL
-            self.log(text, *args)
+            self.show(not self.quiet, text, *args)
     
     def error(self, text, *args):
         """Log a line of text meant to communicate an error."""
@@ -74,7 +81,7 @@ class Logger(object):
                 colorama.Fore.RED + colorama.Style.BRIGHT +
                 text + colorama.Style.RESET_ALL
             )
-        self.log(text, *args)
+        self.show(True, text, *args)
     
     def important(self, text, *args):
         """Log a line of text meant to communicate something very important."""
@@ -83,7 +90,7 @@ class Logger(object):
                 colorama.Fore.YELLOW + colorama.Style.BRIGHT +
                 text + colorama.Style.RESET_ALL
             )
-        self.log(text, *args)
+        self.show(True, text, *args)
         
     def exception(self, text, *args, **kwargs):
         """Log a line of text and information about an exception."""
@@ -93,7 +100,7 @@ class Logger(object):
             info = sys.exc_info()[-1]
         formatted = text % args if args else text
         self.error(formatted)
-        self.log(traceback.format_exc(info))
+        self.show(True, traceback.format_exc(info))
     
     def confirm(self, text, *args):
         """
@@ -106,3 +113,19 @@ class Logger(object):
             formatted = text % args if args else text
             value = input(formatted + ' (y/n) ')
             return value == 'y' or value == 'Y'
+    
+    def wait(self, seconds):
+        """Wait for a given number of seconds."""
+        if self.quiet:
+            time.sleep(seconds)
+        else:
+            print('Waiting for %d seconds...', seconds)
+            step = max(1, seconds // 10)
+            left = seconds % step
+            for _ in range(seconds // step):
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                time.sleep(step)
+            time.sleep(left)
+            sys.stdout.write('\n')
+            sys.stdout.flush()

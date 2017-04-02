@@ -19,6 +19,9 @@ general_options = """
         Omit confirmation prompts and just go ahead with things.
     -v, --verbose
         Output more information than usual about what migrates is doing.
+    -q, --quiet
+        Only log errors and important messages to stdout, and hide the
+        rest. Doesn't affect log file output.
     -V, --version
         Display migrates version and exit.
     --log

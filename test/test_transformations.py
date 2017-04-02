@@ -135,14 +135,15 @@ def __main__():
     
     try:
         mig = migrates.Migrates(connection)
+        mig.logger.quiet = True
         
-        logger.important('Testing a dry run')
+        logger.log('Testing a migration dry run.')
         mig.dry = True
         mig.migrate([mig.get('migration_test_0'), mig.get('migration_test_all')])
         for document in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x']
         
-        logger.important('Testing migration applying to one index and document type')
+        logger.log('Testing migration applying to one index and document type.')
         mig.dry = False
         mig.migrate([mig.get('migration_test_0')])
         for document in iterate_test_data(connection):
@@ -151,18 +152,18 @@ def __main__():
             else:
                 assert doc['_source']['y'] == doc['_source']['x']
         
-        logger.important('Testing migration applying to several indexes and document types.')
+        logger.log('Testing migration applying to several indexes and document types.')
         mig.migrate([mig.get('migration_test_all')])
         for document in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x'] ** 2
         validate_test_template(connection)
         
-        logger.important('Testing migration for removing documents.')
+        logger.log('Testing migration for removing documents.')
         mig.migrate([mig.get('migration_test_remove')])
         for document in iterate_test_data(connection):
             assert False
         
-        logger.important('Validating migration history.')
+        logger.log('Validating migration history.')
         history = connection.search(index='migrates_history')
         assert history['hits']['total'] == 3
         

@@ -62,6 +62,7 @@ class Arguments(object):
             self.logger = Logger(
                 path=self.options.log,
                 verbose=self.options.verbose,
+                quiet=self.options.quiet,
                 yes=self.options.yes or self.options.dry
             )
         return self.logger
@@ -144,6 +145,7 @@ class Arguments(object):
         parser.add_argument('-k', '--keep-dummies', action='store_true')
         parser.add_argument('-r', '--restore-path', type=str, default='')
         parser.add_argument('-y', '--yes', action='store_true')
+        parser.add_argument('-q', '--quiet', action='store_true')
         parser.add_argument('-v', '--verbose', action='store_true')
         parser.add_argument('-V', '--version', action='store_true')
         parser.add_argument('--log', type=str, default='')

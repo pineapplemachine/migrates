@@ -4,7 +4,7 @@ This module implements migrates' actual migration process.
 
 from __future__ import division
 
-import sys, os, time, re, copy, datetime, collections, json
+import sys, os, re, copy, datetime, collections, json
 import elasticsearch
 from elasticsearch import helpers as eshelpers
 
@@ -207,6 +207,19 @@ class Migrates(object):
     def important(self, text, *args):
         """Log an important message."""
         self.logger.important(text, *args)
+        
+    def wait(self, seconds=None):
+        """
+        Helper function to wait for some amount of time and report to stdout.
+        When a number of seconds isn't explicitly provided, the function will
+        wait an amount of time proportional to the number of indexes that are
+        affected by the pending migrations.
+        """
+        if self.dry:
+            return  # Don't wait during dry runs, that would be silly.
+        if seconds is None:
+            seconds = max(5, min(20, len(self.affected)))
+        self.logger.wait(seconds)
     
     def get_dummy_index(self, index):
         """Given an index name, get the name of an intermediate "dummy" index."""
@@ -717,29 +730,7 @@ class Migrates(object):
                             document, add_op_type=True
                         ))
         detail.report()
-
-    def wait(self, seconds=None):
-        """
-        Helper function to wait for some amount of time and report to stdout.
-        When a number of seconds isn't explicitly provided, the function will
-        wait an amount of time proportional to the number of indexes that are
-        affected by the pending migrations.
-        """
-        if self.dry:  # Don't wait during dry runs, that would be silly.
-            return
-        if seconds is None:
-            seconds = max(5, min(20, len(self.affected)))
-        self.log('Waiting for %d seconds...', seconds)
-        step = max(1, seconds // 10)
-        left = seconds % step
-        for _ in range(seconds // step):
-            sys.stdout.write('.')
-            sys.stdout.flush()
-            time.sleep(step)
-        time.sleep(left)
-        sys.stdout.write('\n')
-        sys.stdout.flush()
-        
+    
     def handle_migration_failure(self, state, exception):
         self.log_exception(state.message, exception=exception)
         if self.dry:
