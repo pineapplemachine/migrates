@@ -2,7 +2,7 @@
 This module implements a command-line interface for migrates.
 """
 
-import os, sys, imp, datetime, argparse, re, json
+import os, sys, imp, datetime, argparse, re, json, logging
 import elasticsearch
 
 import usage
@@ -40,6 +40,8 @@ class Arguments(object):
         self.connection = None
         # Persistent Logger instance.
         self.logger = None
+        # Make Elasticsearch logger quieter
+        logging.getLogger('elasticsearch').setLevel(logging.CRITICAL)
     
     def get_connection(self):
         if self.connection is None:
