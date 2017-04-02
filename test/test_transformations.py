@@ -2,6 +2,8 @@
 This is an automated test for verifying migration behavior and stability.
 """
 
+from __future__ import division
+
 import elasticsearch
 from elasticsearch import helpers as eshelpers
 
@@ -53,7 +55,7 @@ def insert_test_data(connection):
         for i in range(0, 1200):
             batch.add({
                 '_op_type': 'index',
-                '_index': 'migrates_test_' + str(i / 200),
+                '_index': 'migrates_test_' + str(i // 200),
                 '_type': 'test_' + str(i % 3),
                 '_id': str(i),
                 '_source': {

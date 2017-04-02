@@ -5,6 +5,12 @@ indexes affected by migration.
 
 import traceback, copy, collections, json
 
+# Use long integers for both Python 2 and 3
+try:
+    x = long(0)
+except NameError:
+    long = int
+
 class MigratesIndexDetail(object):
     def __init__(self, detail, logger):
         self.detail = detail
