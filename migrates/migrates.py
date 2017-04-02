@@ -332,7 +332,7 @@ class Migrates(object):
             self.verbose('Skipping writing original template data.')
             return
         self.log('Writing original template data to path "%s".', self.restore_templates_path)
-        with open(self.restore_templates_path, 'wb') as output_file:
+        with open(self.restore_templates_path, 'w') as output_file:
             json.dump(self.original_templates, output_file)
     
     def write_affected_indexes(self):
@@ -340,7 +340,7 @@ class Migrates(object):
             self.verbose('Skipping writing affected index information.')
             return
         self.log('Writing affected index information to path "%s".', self.restore_indexes_path)
-        with open(self.restore_indexes_path, 'wb') as output_file:
+        with open(self.restore_indexes_path, 'w') as output_file:
             json.dump(list(self.affected), output_file)
     
     def write_pending_migrations(self):
@@ -351,7 +351,7 @@ class Migrates(object):
         migrations = [
             self.migration_action(migration) for migration in self.migrations
         ]
-        with open(self.restore_migrations_path, 'wb') as output_file:
+        with open(self.restore_migrations_path, 'w') as output_file:
             json.dump(migrations, output_file)
     
     def get_templates(self):

@@ -79,7 +79,7 @@ Writing affected index information to path "(.+?)"\..*
 def call(args):
     return subprocess.check_output([
         'python -m migrates.__main__ ' + args
-    ], shell=True)
+    ], shell=True).decode('utf-8')
 
 
 
