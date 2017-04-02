@@ -118,7 +118,7 @@ class migration_test_remove(object):
 
 
 
-if __name__ == '__main__':
+def __main__():
     logger = Logger()
     connection = elasticsearch.Elasticsearch()
     
@@ -166,3 +166,8 @@ if __name__ == '__main__':
         # All done! Do some cleanup.
         logger.log('Cleaning up test data from Elasticsearch.')
         remove_test_data(connection)
+
+
+
+if __name__ == '__main__':
+    __main__()
