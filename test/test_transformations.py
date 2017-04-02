@@ -50,7 +50,7 @@ def remove_test_data(connection):
 
 def insert_test_data(connection):
     with migrates.Batch(connection, migrates.Logger()) as batch:
-        for i in xrange(0, 1200):
+        for i in range(0, 1200):
             batch.add({
                 '_op_type': 'index',
                 '_index': 'migrates_test_' + str(i / 200),
@@ -119,14 +119,16 @@ class migration_test_remove(object):
 
 
 def __main__():
-    logger = Logger()
+    logger = migrates.Logger()
     connection = elasticsearch.Elasticsearch()
     
     logger.log('Removing current migration history')
     remove_migration_history(connection)
     
-    logger.log('Inserting test data into Elasticsearch.')
+    logger.log('Removing data from previous tests, if present.')
     remove_test_data(connection)
+    
+    logger.log('Inserting test data into Elasticsearch.')
     insert_test_data(connection)
     
     try:

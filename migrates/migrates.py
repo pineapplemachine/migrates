@@ -8,9 +8,9 @@ import sys, os, time, re, copy, datetime, collections, json
 import elasticsearch
 from elasticsearch import helpers as eshelpers
 
-from batch import Batch
-from logger import Logger
-from detail import MigratesIndexDetail
+from .batch import Batch
+from .logger import Logger
+from .detail import MigratesIndexDetail
 
 
 

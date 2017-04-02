@@ -48,6 +48,7 @@ class Batch(object):
         Flush the queue. This invokes the Elasticsearch API's bulk helper.
         It will attempt the operation several times in case it fails.
         """
+        self.logger.debug('Flushing queue of %s actions.', len(self.actions))
         if self.actions:
             try:
                 elasticsearch.helpers.bulk(self.connection, self.actions)
