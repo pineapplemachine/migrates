@@ -256,7 +256,7 @@ class Migrates(object):
                     client=self.connection,
                     index=self.history_index,
                     doc_type=self.history_doc_type,
-                    query={'filter': {'match_all': {}}}
+                    query={"query": {"match_all": {}}}
                 )
             )
             return migration_history
@@ -371,9 +371,14 @@ class Migrates(object):
         """Get a dictionary of templates currently present in Elasticsearch."""
         self.verbose('Retrieving templates from Elasticsearch.')
         # The Python API doesn't seem to provide a nice wrapper for this
-        return self.connection.transport.perform_request(
+        # Also, depending on API version, this could be a dict or a tuple.
+        result = self.connection.transport.perform_request(
             'GET', '/_template/', params=None
-        )[1]
+        )
+        try:
+            return result[1]
+        except KeyError:
+            return result
         
     def migrate(self, migrations=None):
         """
@@ -600,7 +605,7 @@ class Migrates(object):
                     }
                     for document in eshelpers.scan(
                         client=self.connection, index=index,
-                        query={"filter": {"match_all": {}}}
+                        query={"query": {"match_all": {}}}
                     )
                 )
                 
@@ -706,7 +711,7 @@ class Migrates(object):
                 for document in eshelpers.scan(
                     client=self.connection,
                     index=index if self.dry else self.get_dummy_index(index),
-                    query={"filter": {"match_all": {}}}
+                    query={"query": {"match_all": {}}}
                 ):
                     if not self.dry:
                         document['_index'] = self.get_original_index(document['_index'])
@@ -824,7 +829,7 @@ class Migrates(object):
                         for document in eshelpers.scan(
                             client=self.connection,
                             index=dummy,
-                            query={"filter": {"match_all": {}}}
+                            query={"query": {"match_all": {}}}
                         )
                     )
         except BaseException:

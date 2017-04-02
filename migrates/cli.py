@@ -300,7 +300,7 @@ def show_history(args):
             doc_type=args.options.history_doc_type,
             preserve_order=True,
             query={
-                'filter': es_filter,
+                'query': es_filter,
                 'sort': [
                     {'timestamp': {'order': 'asc'}},
                     {'migration_date': {'order': 'asc'}}
