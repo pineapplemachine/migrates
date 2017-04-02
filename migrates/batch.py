@@ -53,7 +53,7 @@ class Batch(object):
                 elasticsearch.helpers.bulk(self.connection, self.actions)
             except elasticsearch.helpers.BulkIndexError as e:
                 if attempts < max_attempts:
-                    self.logger.warning('Bulk action failed; trying again in a few seconds...')
+                    self.logger.error('Bulk action failed. Trying again in a few seconds...')
                     time.sleep(5)
                     self.flush(max_attempts=max_attempts, attempts=attempts + 1)
                 else:
