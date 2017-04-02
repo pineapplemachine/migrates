@@ -5,9 +5,9 @@ This module implements a command-line interface for migrates.
 import os, sys, imp, datetime, argparse, re, json, logging
 import elasticsearch
 
-import usage
-import migrates
-from logger import Logger
+from . import usage
+from . import migrates
+from .logger import Logger
 
 
 

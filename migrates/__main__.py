@@ -1,2 +1,2 @@
-import cli
-cli.__main__()
+from .cli import __main__
+__main__()
