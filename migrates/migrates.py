@@ -286,6 +286,7 @@ class Migrates(object):
                         "dynamic": False,
                         "properties": {
                             "timestamp": {"type": "date"},
+                            "migration_date": {"type": "date"},
                             "name": {"type": "string", "index": "not_analyzed"},
                             "description": {"type": "string", "index": "not_analyzed"},
                             "internal": {"type": "boolean"}
@@ -319,6 +320,7 @@ class Migrates(object):
             '_id': migration.name + '/' + self.timestamp.strftime('%Y%m%d%H%M%S'),
             '_source': {
                 'timestamp': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'migration_date': migration.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'name': migration.name,
                 'description': migration.description,
                 'internal': migration.internal
@@ -878,7 +880,8 @@ class Migration(object):
     """
     
     # Minimum representable datetime.
-    mindate = datetime.datetime(year=datetime.MINYEAR, month=1, day=1)
+    # Year is 1900 for compatibility with strftime.
+    min_date = datetime.datetime(year=1900, month=1, day=1)
     
     def __init__(self, target, name, date, description=None, repeat=False, internal=False):
         """
@@ -915,6 +918,8 @@ class Migration(object):
             self.date = date
         else:
             self.date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        if self.date < self.min_date:
+            raise ValueError('Migration date must be at least 1900-01-01.')
         if description is None and hasattr(target, 'description'):
             self.description = target.description
         else:
@@ -930,7 +935,7 @@ class Migration(object):
             return cls(
                 name='migrates/reindex/%s' % index,
                 description='Reindex "%s".' % index,
-                date=cls.mindate, repeat=True, internal=True,
+                date=cls.min_date, repeat=True, internal=True,
                 target=type('migration', (object,), {
                     'transform_documents': staticmethod(
                         lambda: {index: {'*': lambda doc: doc}}
@@ -944,7 +949,7 @@ class Migration(object):
             return cls(
                 name='migrates/reindex/%s/%s' % (index, target),
                 description='Reindex "%s" to "%s".' % (index, target),
-                date=cls.mindate, repeat=True, internal=True,
+                date=cls.min_date, repeat=True, internal=True,
                 target=type('migration', (object,), {
                     'transform_documents': staticmethod(
                         lambda: {index: {'*': transform}}
@@ -958,7 +963,7 @@ class Migration(object):
         return cls(
             name='migrates/set_templates',
             description='Set template data.',
-            date=cls.mindate, repeat=True, internal=True,
+            date=cls.min_date, repeat=True, internal=True,
             target=type('migration', (object,), {
                 'transform_templates': staticmethod(
                     lambda _: templates

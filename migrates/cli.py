@@ -297,7 +297,10 @@ def show_history(args):
             preserve_order=True,
             query={
                 'filter': es_filter,
-                'sort': {'timestamp': {'order': 'asc'}}
+                'sort': [
+                    {'timestamp': {'order': 'asc'}},
+                    {'migration_date': {'order': 'asc'}}
+                ]
             }
         ):
             any_history = True
