@@ -52,7 +52,7 @@ class Logger(object):
     def log(self, text, *args):
         """Log a line of text."""
         formatted = text % args if args else text
-        print formatted
+        print(formatted)
         if self.output_file is not None:
             self.output_file.write(formatted)
             self.output_file.write('\n')

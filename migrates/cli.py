@@ -180,7 +180,7 @@ class Arguments(object):
             )
         ):
             self.get_logger().log('Invalid number of command arguments.')
-            print usage.commands[self.command]
+            print(usage.commands[self.command])
             return False
         else:
             return True
@@ -193,7 +193,7 @@ def __main__(args=None):
     if args.options.version:
         version(args)
     elif args.command is None or args.command not in commands:
-        print usage.general
+        print(usage.general)
     else:
         commands[args.command](args)
 
@@ -201,13 +201,13 @@ def __main__(args=None):
 
 def show_help(args):
     if len(args.args) == 0:
-        print usage.general
+        print(usage.general)
     elif len(args.args) >= 1:
         if args.args[0] in usage.commands:
-            print usage.commands[args.args[0]]
+            print(usage.commands[args.args[0]])
         else:
-            print 'Unknown command "%s".' % args.args[0]
-            print usage.help
+            print('Unknown command "%s".' % args.args[0])
+            print(usage.help)
 
 
 

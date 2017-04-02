@@ -3,11 +3,11 @@ from setuptools import setup
 __version__ = (0, 1, 0)
 __versionstr__ = '.'.join(str(i) for i in __version__)
 
-with open('readme.md', 'rb') as description_file:
+with open('readme.md', 'U') as description_file:
     long_description = description_file.read()
 
-with open('requirements.txt', 'rb') as reqs_file:
-    install_requires = reqs_file.read().split('\n')
+with open('requirements.txt', 'U') as reqs_file:
+    install_requires = reqs_file.read().splitlines()
 
 setup(
     name='migrates',
