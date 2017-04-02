@@ -557,9 +557,17 @@ class Migrates(object):
                 result.mappings[index] = self.connection.indices.get_mapping(
                     index=target
                 )[target]['mappings']
-                result.settings[index] = self.connection.indices.get_settings(
+                settings = self.connection.indices.get_settings(
                     index=target
                 )[target]['settings']
+                # Elasticsearch 5.x includes an "index.creation_date" field in
+                # responses but does not accept the field for index creation.
+                # Since that's what this data will be used for later, remove
+                # the field now.
+                if 'index' in settings and 'creation_date' in settings['index']:
+                    del settings['index']
+                result.settings[index] = settings
+                    
             except elasticsearch.exceptions.NotFoundError:
                 self.verbose('Could not get settings for nonexistent index "%s".', index)
         return result
