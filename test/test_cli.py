@@ -1,3 +1,7 @@
+"""
+This is an automated test for verifying CLI behavior in several cases.
+"""
+
 import sys, re, subprocess
 import elasticsearch
 import migrates
@@ -59,6 +63,11 @@ new_history_regex = r"""
 \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ: "migration_3", Do another thing entirely.*
 """.strip()
 
+partial_history_regex = r"""
+(?s).*\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ: "migration_1", Do another thing
+\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ: "migration_2", Do yet another thing.*
+""".strip()
+
 run_migration_regex = r"""
 (?s).*Writing original template data to path "(.+?)"\.
 Writing migration information to path "(.+?)"\.
@@ -91,6 +100,12 @@ def __main__():
     assert no_history_text in call('history')
     run_migration = call('run --path %s -y' % sys.argv[0])
     assert re.match(new_history_regex, call('history'))
+    call('remove_history -y')
+    assert no_history_text in call('history')
+    
+    logger.log('Testing history when running specified migrations.')
+    call('run migration_1 migration_2 --path %s -y' % sys.argv[0])
+    assert re.match(partial_history_regex, call('history'))
     call('remove_history -y')
     assert no_history_text in call('history')
     
