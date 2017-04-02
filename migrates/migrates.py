@@ -94,6 +94,9 @@ class Migrates(object):
     default_history_doc_type = 'migration'
     default_dummy_index_prefix = 'migrates_dummy_'
     
+    # Commonly-used query for scanning the complete contents of an index
+    scan_query = {"query": {"match_all": {}}, "sort": ["_doc"]}
+    
     @classmethod
     def add(cls, migration):
         """Add a Migration object to the registry."""
@@ -254,9 +257,10 @@ class Migrates(object):
                 document['_source']['name']
                 for document in eshelpers.scan(
                     client=self.connection,
+                    preserve_order=True,
                     index=self.history_index,
                     doc_type=self.history_doc_type,
-                    query={"query": {"match_all": {}}}
+                    query=self.scan_query
                 )
             )
             return migration_history
@@ -604,8 +608,10 @@ class Migrates(object):
                         '_source': document['_source']
                     }
                     for document in eshelpers.scan(
-                        client=self.connection, index=index,
-                        query={"query": {"match_all": {}}}
+                        client=self.connection,
+                        preserve_order=True,
+                        index=index, doc_type="*",
+                        query=self.scan_query
                     )
                 )
                 
@@ -710,8 +716,10 @@ class Migrates(object):
                 self.log('Transforming documents in index "%s".', index)
                 for document in eshelpers.scan(
                     client=self.connection,
+                    preserve_order=True,
                     index=index if self.dry else self.get_dummy_index(index),
-                    query={"query": {"match_all": {}}}
+                    doc_type="*",
+                    query=self.scan_query
                 ):
                     if not self.dry:
                         document['_index'] = self.get_original_index(document['_index'])
@@ -828,8 +836,9 @@ class Migrates(object):
                         }
                         for document in eshelpers.scan(
                             client=self.connection,
-                            index=dummy,
-                            query={"query": {"match_all": {}}}
+                            preserve_order=True,
+                            index=dummy, doc_type="*",
+                            query=self.scan_query
                         )
                     )
         except BaseException:

@@ -66,9 +66,10 @@ def insert_test_data(connection):
 def iterate_test_data(connection):
     for document in eshelpers.scan(
         client=connection,
+        preserve_order=True,
         index='migrates_test_*',
         doc_type='test_*',
-        query={'filter': {'match_all': {}}}
+        query=migrates.Migrates.scan_query
     ):
         yield document
 

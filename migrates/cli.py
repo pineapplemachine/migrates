@@ -4,6 +4,7 @@ This module implements a command-line interface for migrates.
 
 import os, sys, imp, datetime, argparse, re, json, logging
 import elasticsearch
+from elasticsearch import helpers as eshelpers
 
 from . import usage
 from . import migrates
@@ -294,16 +295,16 @@ def show_history(args):
         es_filter = {'range': {'timestamp': range_filter}}
     try:
         any_history = False
-        for document in elasticsearch.helpers.scan(
+        for document in eshelpers.scan(
             client=args.get_connection(),
             index=args.options.history_index,
             doc_type=args.options.history_doc_type,
             preserve_order=True,
             query={
-                'query': es_filter,
-                'sort': [
-                    {'timestamp': {'order': 'asc'}},
-                    {'migration_date': {'order': 'asc'}}
+                "query": es_filter,
+                "sort": [
+                    {"timestamp": {"order": "asc"}},
+                    {"migration_date": {"order": "asc"}}
                 ]
             }
         ):
