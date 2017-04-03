@@ -6,9 +6,29 @@ and is distributed under the
 [GNU GPL v3.0](https://github.com/pineapplemachine/migrates/blob/master/LICENSE)
 license.
 
+Migrates is tested with Python 2.7.13 and 3.6.1, and with Elasticsearch
+1.7.2, 2.4.2, and 5.3.0. It is tested with [elasticsearch-py]
+(https://www.github.com/elastic/elasticsearch-py) 1.7.0 and 5.3.0.
+Though migrates itself should be compatible with a broad range of versions of
+elasticsearch-py, some later versions of the package may not be compatible with
+older versions of Elasticsearch.
+
+In addition to elasticsearch-py, migrates also depends on [colorama]
+(https://www.github.com/tartley/colorama) for log prettification.
+Migrates still functions without colorama, but your logs would be
+substaintally less colorful that way.
+
 Though migrates is designed such that a failed operation should never cause
 irrecoverable data loss, _please don't take my word for it_. If your data is
 important then back it up often, and certainly do so before using migrates.
+In case something _does_ go wrong, migrates will attempt to automatically
+recover your data. If recovery fails, it will tell you what to do to try
+again. Try not to worry — migrates doesn't make any changes to your data
+before making sure the original data exists somewhere else first.
+
+Though that doesn't cancel out the risk of a misguided migration successfully
+doing something with your data that you ended up not wanting to do.
+Be careful, and make liberal use of migrates' dry run feature!
 
 ## Setup
 
