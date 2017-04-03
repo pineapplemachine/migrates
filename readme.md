@@ -7,14 +7,15 @@ and is distributed under the
 license.
 
 Migrates is tested with Python 2.7.13 and 3.6.1, and with Elasticsearch
-1.7.2, 2.4.2, and 5.3.0. It is tested with [elasticsearch-py]
-(https://www.github.com/elastic/elasticsearch-py) 1.7.0 and 5.3.0.
+1.7.2, 2.4.2, and 5.3.0. It is tested with
+[elasticsearch-py](https://www.github.com/elastic/elasticsearch-py)
+1.7.0 and 5.3.0.
 Though migrates itself should be compatible with a broad range of versions of
 elasticsearch-py, some later versions of the package may not be compatible with
 older versions of Elasticsearch.
 
-In addition to elasticsearch-py, migrates also depends on [colorama]
-(https://www.github.com/tartley/colorama) for log prettification.
+In addition to elasticsearch-py, migrates also depends on
+[colorama](https://www.github.com/tartley/colorama) for log prettification.
 Migrates still functions without colorama, but your logs would be
 substaintally less colorful that way.
 
