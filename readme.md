@@ -204,148 +204,61 @@ you can run `migrates run --detail *`.
 
 ### Commands
 
+Here are summaries of some of the most important commands that migrates makes
+available.
 For a complete explanation of the commands and the options they accept, please
-use `migrates help <command>`.
-
-#### help
-
-Show information and usage instructions for a command, or general usage
-when no command is given.
-
-``` text
-migrates help
-migrates help run
-```
+use `migrates help` and `migrates help <command>`.
 
 #### run
 
-When a list of migration names is explicitly given, those migrations
-are run in the order they were provided.
-When no list of names is given, pending migrations are run. (Pending
-migrations include those which have been registered by the user but,
-according to the migration history found in Elasticsearch, have never
-been run.) Pending migrations are run in ascending timestamp order.
+The `run` command is used to run a series of migrations specified by name, or
+any pending migrations. (Pending migrations are those that you've registered
+with migrates but that haven't been run on a given Elasticsearch host yet.)
+
+To run a migration named `my_migration` you could do this:
 
 ``` text
-migrates run --host 192.0.2.10:9200 --path my/migrations/path
-migrates run my_migration_name --dry --path my/migrations/path
+migrates run my_migration --path my/migrations/path
 ```
 
-#### reindex
-
-Reindex the contents of an index or indexes, optionally to a different
-destination index than where the documents were originally located.
-This functionality can be used, for example, to update the settings
-and mappings of an index after changing a template which applies to it.
-When "=>" is present in an index option, it indicates that documents in
-the index on the left side should be reindexed into the index on the
-right side.
-When "=>" is not present, documents are reindexed back into the same
-index that they came from.
+To run pending migrations in ascending timestamp order:
 
 ``` text
-migrates reindex my_index another_index
-migrates reindex "source_index=>destination_index"
-migrates reindex "index_prefix_*"
-migrates reindex my_index a_index=>b_index --host 192.0.2.10:9200 --dry
+migrates run --path my/migrations/path
+```
+
+Don't forget to make use of the dry run and detail features!
+This would tell you the migrations that would run and how they would affect
+your data, without actually modifying it.
+
+``` text
+migrates run --path my/migrations/path --dry --detail *
 ```
 
 #### history
 
-Describe the migrations that have been applied to Elasticsearch data
-according to the history index that migrates maintains.
-Timestamps are interpreted as UTC. They must be either of the format
-"%%Y-%%m-%%d" or "%%Y-%%m-%%dT%%H:%%M:%%SZ".
-Accepts zero, one, or two timestamp arguments. If there are no such
-arguments, all migration history is shown. If there's one, migration
-history since that time is shown. If there are two, migration history
-starting with the first time and ending with the second time is shown.
+The `history` command is for listing migration history for a given Elasticsearch
+host. It tells you what migrations were run and when.
 
 ``` text
 migrates history --host 192.0.2.10:9200
-migrates history 2012-01-01
-migrates history 2012-02-28T10:00:00Z 2012-04-01T13:00:00:00Z
 ```
 
 #### migrations
 
-List and describe the migrations known by migrates.
+The `migrations` command lists migrations that have been registered with
+migrates and describes them.
 
 ``` text
-migrates migrations --host 192.0.2.10:9200 --path my/migrations/path
-migrates migrations --pending --path my/migrations/path
-```
-
-#### restore_templates
-
-Load templates from a json file and update the templates currently in
-Elasticsearch to reflect them.
-This may be used to recover Elasticsearch state after a failed
-migration, if normal recovery fails or is prematurely terminated.
-
-``` text
-migrates restore_templates my/templates.json
-```
-
-#### restore_indexes
-
-Given a json file describing indexes that were affected by a recent
-migration attempt, restore documents from dummy indexes back to their
-original locations.
-This may be used to recover Elasticsearch state after a failed
-migration, if normal recovery fails or is prematurely terminated.
-
-``` text
-migrates restore_indexes my/indexes.json
-```
-
-#### restore_history
-
-Load migration history information from a json file and update
-migrates' history index in Elasticsearch to include that data.
-This may be used to recover Elasticsearch state after a failed
-migration, if normal recovery fails or is prematurely terminated.
-
-``` text
-migrates restore_history my/history.json
-```
-
-#### restore_cleanup
-
-Clean up old recovery files that are written at the beginning of
-migration to be used to restore Elasticsearch state in case of a
-migration failure and normal recovery failure.
-
-``` text
-migrates restore_cleanup
-migrates restore_cleanup --older-than 2000-01-01
-```
-
-#### remove_history
-
-Remove migrates' migration history index from Elasticsearch.
-Migration history is stored in the "migrates_history" index unless
-otherwise specified.
-
-``` text
-migrates remove_history --host 192.0.2.10:9200
-```
-
-#### remove_dummies
-
-Intermediate "dummy" indexes are created during the migration
-process and, unless otherwise specified, removed at the end of the
-process after a successful migration or failure recovery has taken
-place.
-This command indiscriminately removes anything that looks like
-one of migrates' dummy indexes. This means any index matching the
-pattern "migrates_dummy_*", assuming that migrates hasn't been told
-to write and look for its dummies somewhere else. Be careful!
-
-``` text
-migrates remove_dummies --host 192.0.2.10:9200
+migrates migrations --path my/migrations/path
 ```
 
 ## Running tests
 
-Automated tests for this repository are currently a work in progress!
+The `vagrant/` directory of this repository contains tools for provisioning
+a Ubuntu VM using [vagrant](https://www.vagrantup.com/) and then running the
+automated tests in the `test/` directory across different versions of Python,
+Elasticsearch, and elasticsearch-py.
+
+There's a readme with testing instructions in that directory
+[here](https://github.com/pineapplemachine/migrates/blob/master/vagrant/readme.md).
