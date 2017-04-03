@@ -119,7 +119,7 @@ class Logger(object):
         if self.quiet:
             time.sleep(seconds)
         else:
-            print('Waiting for %d seconds...', seconds)
+            print('Waiting for %d seconds...' % seconds)
             step = max(1, seconds // 10)
             left = seconds % step
             for _ in range(seconds // step):

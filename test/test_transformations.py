@@ -39,6 +39,9 @@ test_template = {
 }
 
 
+document_count = 1200
+
+
 
 def remove_test_data(connection):
     try:
@@ -52,7 +55,7 @@ def remove_test_data(connection):
 
 def insert_test_data(connection):
     with migrates.Batch(connection, migrates.Logger()) as batch:
-        for i in range(0, 1200):
+        for i in range(0, document_count):
             batch.add({
                 '_op_type': 'index',
                 '_index': 'migrates_test_' + str(i // 200),
@@ -68,7 +71,6 @@ def iterate_test_data(connection):
         client=connection,
         preserve_order=True,
         index='migrates_test_*',
-        doc_type='test_*',
         query=migrates.Migrates.scan_query
     ):
         yield document
@@ -141,27 +143,36 @@ def __main__():
         logger.log('Testing a migration dry run.')
         mig.dry = True
         mig.migrate([mig.get('migration_test_0'), mig.get('migration_test_all')])
-        for document in iterate_test_data(connection):
+        count = 0
+        for doc in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x']
+            count += 1
+        assert count == document_count
         
         logger.log('Testing migration applying to one index and document type.')
         mig.dry = False
         mig.migrate([mig.get('migration_test_0')])
-        for document in iterate_test_data(connection):
-            if document['_index'] == 'migrates_test_0' and document['_type'] == 'test_0':
+        count = 0
+        for doc in iterate_test_data(connection):
+            if doc['_index'] == 'migrates_test_0' and doc['_type'] == 'test_0':
                 assert doc['_source']['y'] == doc['_source']['x'] ** 2
             else:
                 assert doc['_source']['y'] == doc['_source']['x']
+            count += 1
+        assert count == document_count
         
         logger.log('Testing migration applying to several indexes and document types.')
         mig.migrate([mig.get('migration_test_all')])
-        for document in iterate_test_data(connection):
+        count = 0
+        for doc in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x'] ** 2
+            count += 1
+        assert count == document_count
         validate_test_template(connection)
         
         logger.log('Testing migration for removing documents.')
         mig.migrate([mig.get('migration_test_remove')])
-        for document in iterate_test_data(connection):
+        for doc in iterate_test_data(connection):
             assert False
         
         logger.log('Validating migration history.')

@@ -631,7 +631,7 @@ class Migrates(object):
                 dummy = self.get_dummy_index(index)
                 self.log(
                     'Populating dummy index "%s" with documents from "%s".',
-                    index, dummy
+                    dummy, index
                 )
                 if self.dry:
                     continue
@@ -646,7 +646,7 @@ class Migrates(object):
                     for document in eshelpers.scan(
                         client=self.connection,
                         preserve_order=True,
-                        index=index, doc_type="*",
+                        index=index,
                         query=self.scan_query
                     )
                 )
@@ -754,7 +754,6 @@ class Migrates(object):
                     client=self.connection,
                     preserve_order=True,
                     index=index if self.dry else self.get_dummy_index(index),
-                    doc_type="*",
                     query=self.scan_query
                 ):
                     if not self.dry:
@@ -873,7 +872,7 @@ class Migrates(object):
                         for document in eshelpers.scan(
                             client=self.connection,
                             preserve_order=True,
-                            index=dummy, doc_type="*",
+                            index=dummy,
                             query=self.scan_query
                         )
                     )
