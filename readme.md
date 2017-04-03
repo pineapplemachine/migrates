@@ -27,7 +27,7 @@ recover your data. If recovery fails, it will tell you what to do to try
 again. Try not to worry — migrates doesn't make any changes to your data
 before making sure the original data exists somewhere else first.
 
-Though that doesn't cancel out the risk of a misguided migration successfully
+Though that doesn't rule out the risk of a misguided migration successfully
 doing something with your data that you ended up not wanting to do.
 Be careful, and make liberal use of migrates' dry run feature!
 
@@ -163,45 +163,6 @@ goes so wrong migrates should tell you how to fix it.
 The `remove_*` commands can be used to remove Elasticsearch data that migrates
 creates.
 
-### Options
-
-Here are listed some of the most important options. For more information and
-for a complete listing, please using `migrates help <command>`.
-Note that some options are not applicable to all commands.
-
-#### host
-
-The `--host` option is for specifying one or more Elasticsearch hosts to operate
-on. If no hosts are specified, migrates defaults to `127.0.0.1:9200`.
-
-#### path
-
-One or more paths to either Python package directories or individual Python
-files can be specified using the `--path` option.
-These modules will be imported so that any migrations that they register
-can be recognized and handled by migrates. For example, if you implemented your
-migrations in a `my_migrations.py` script, you would want to run something like
-`migrates run --path path/to/my_migrations.py`.
-
-#### dry
-
-The `--dry` flag indicates that migrates should do a dry run, where it reports
-everything that would happen during a normal run, without actually modifying
-any data. Every command that would normally modify data respects the `--dry`
-flag, not only `run`.
-
-#### detail
-
-The `--detail` option takes one or more pattern strings and when, during
-migration, a template or index name matches any of the patterns given here,
-extra information will be given about the changes that are taking place.
-Templates matching a pattern will have their complete original and updated
-contents outputted, and one document per index and document type will also
-have the original and updated versions outputted when the containing index
-matches any of the patterns.
-To show detailed information about changes to all templates and indexes,
-you can run `migrates run --detail *`.
-
 ### Commands
 
 Here are summaries of some of the most important commands that migrates makes
@@ -252,6 +213,45 @@ migrates and describes them.
 ``` text
 migrates migrations --path my/migrations/path
 ```
+
+### Options
+
+Here are listed some of the most important options. For more information and
+for a complete listing, please using `migrates help <command>`.
+Note that some options are not applicable to all commands.
+
+#### host
+
+The `--host` option is for specifying one or more Elasticsearch hosts to operate
+on. If no hosts are specified, migrates defaults to `127.0.0.1:9200`.
+
+#### path
+
+One or more paths to either Python package directories or individual Python
+files can be specified using the `--path` option.
+These modules will be imported so that any migrations that they register
+can be recognized and handled by migrates. For example, if you implemented your
+migrations in a `my_migrations.py` script, you would want to run something like
+`migrates run --path path/to/my_migrations.py`.
+
+#### dry
+
+The `--dry` flag indicates that migrates should do a dry run, where it reports
+everything that would happen during a normal run, without actually modifying
+any data. Every command that would normally modify data respects the `--dry`
+flag, not only `run`.
+
+#### detail
+
+The `--detail` option takes one or more pattern strings and when, during
+migration, a template or index name matches any of the patterns given here,
+extra information will be given about the changes that are taking place.
+Templates matching a pattern will have their complete original and updated
+contents outputted, and one document per index and document type will also
+have the original and updated versions outputted when the containing index
+matches any of the patterns.
+To show detailed information about changes to all templates and indexes,
+you can run `migrates run --detail *`.
 
 ## Running tests
 
