@@ -131,7 +131,7 @@ class Migrates(object):
         return decorator
     
     def __init__(
-        self, connection=None, logger=None, dry=False,
+        self, connection=None, logger=None, dry=False, no_history=False,
         detail=None, keep_dummies=False, restore_path=None,
         history_template=default_history_template,
         history_index=default_history_index,
@@ -152,6 +152,8 @@ class Migrates(object):
         self.dummy_index_prefix = dummy_index_prefix
         # Whether this is a dry run.
         self.dry = dry
+        # When True, don't write migration history.
+        self.no_history = no_history
         # Indexes to show an increased amount of detail when migrating.
         self.detail = detail
         # Whether to keep dummy indexes rather than cleaning them up afterwards.
@@ -186,6 +188,18 @@ class Migrates(object):
             self.restore_migrations_path = os.path.join(
                 restore_path, 'migrates.migrations.' + path_date + '.json'
             )
+        # Will store Elasticsearch version information
+        self.es_version = self.get_es_version()
+        self.verbose('Found Elasticsearch version %s.', self.es_version)
+    
+    def get_es_version(self):
+        response = self.connection.transport.perform_request(
+            'GET', '/', params=None
+        )
+        try:
+            return response[1]['version']['number']
+        except KeyError:
+            return response['version']['number']
     
     def batch(self, *args, **kwargs):
         """Get a batch object for handling bulk actions."""
@@ -289,9 +303,21 @@ class Migrates(object):
                 ', '.join(str(migration) for migration in pending)
             )
         return pending
+    
+    def get_keyword_field(self):
+        """
+        For Elasticsearch 5.x and later, return a "keyword" field mapping.
+        For prior versions, return a "not_analyzed" "string" field mapping.
+        """
+        if self.es_version and int(self.es_version[0]) >= 5:
+            return {"type": "keyword", "index": True}
+        else:
+            return {"type": "string", "index": "not_analyzed"}
 
     def enforce_history_template(self):
         """Make sure that the template used by migrates is present in ES."""
+        if self.no_history:
+            return
         self.verbose('Verifying that history template is present in Elasticsearch.')
         self.connection.indices.put_template(
             create=False,
@@ -304,8 +330,8 @@ class Migrates(object):
                         "properties": {
                             "timestamp": {"type": "date"},
                             "migration_date": {"type": "date"},
-                            "name": {"type": "string", "index": "not_analyzed"},
-                            "description": {"type": "string", "index": "not_analyzed"},
+                            "name": self.get_keyword_field(),
+                            "description": self.get_keyword_field(),
                             "internal": {"type": "boolean"}
                         }
                     }
@@ -315,6 +341,8 @@ class Migrates(object):
 
     def write_migration_history(self, migration_actions=None):
         """Write migration history information to Elasticsearch."""
+        if self.no_history:
+            return
         if migration_actions is None:
             migration_actions = [
                 self.migration_action(migration) for migration in self.migrations

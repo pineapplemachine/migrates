@@ -76,6 +76,7 @@ class Arguments(object):
             dry=self.options.dry,
             detail=self.options.detail,
             keep_dummies=self.options.keep_dummies,
+            no_history=self.options.no_history,
             restore_path=self.options.restore_path,
             history_template=self.options.history_template,
             history_index=self.options.history_index,
@@ -149,6 +150,7 @@ class Arguments(object):
         parser.add_argument('-q', '--quiet', action='store_true')
         parser.add_argument('-v', '--verbose', action='store_true')
         parser.add_argument('-V', '--version', action='store_true')
+        parser.add_argument('--no-history', action='store_true')
         parser.add_argument('--log', type=str, default='')
         # Advanced options
         parser.add_argument('--history-template', type=str,

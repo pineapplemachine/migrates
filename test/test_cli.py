@@ -126,11 +126,13 @@ def __main__():
     logger.log('Testing templates recovery.')
     call('restore_templates "%s" --dry' % templates_path)
     assert 'migrates_test_template' in mig.get_templates()
-    call('restore_templates "%s" -y' % templates_path)
+    call('restore_templates "%s" -y --no-history' % templates_path)
     assert mig.get_templates() == original_templates
+    # restore_templates normally creates a history entry -
+    # make sure the --no-history flag produced the expected behavior.
+    assert no_history_text in call('history')
     
     logger.log('Testing migration history recovery.')
-    call('remove_history -y')  # Note that template recovery creates a history entry
     call('restore_history "%s" --dry' % migrations_path)
     assert no_history_text in call('history')
     call('restore_history "%s" --y' % migrations_path)

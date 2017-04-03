@@ -28,12 +28,14 @@ general_options = """
         Path to a file to log output to."""
 
 migration_options = """
-    -l, --detail
+    -l, --detail <patterns...>
         Specifies one or more index and template patterns that are of
         particular interest. When migration affects documents in an
         index whose name matches any pattern, or templates whose names
         match any pattern, extra information regarding action that was
         taken is outputted.
+        Use "--detail *" to report detailed information about the entire
+        process.
     -k, --keep-dummies
         Normally, as a part of index migration, intermediate "dummy"
         indexes are created to store a copy of the original data, and
@@ -44,7 +46,10 @@ migration_options = """
     -r, --restore-path
         Path to write files to that can be used to restore Elasticsearch
         state in case of a migration failure. Defaults to the directory
-        that the migrates script is located in."""
+        that the migrates script is located in.
+    --no-history
+        When this flag is present, migrates won't write migration history
+        information to Elasticsearch."""
 
 general = """
 Usage:
