@@ -2,9 +2,12 @@
 This is an automated test for verifying CLI behavior in several cases.
 """
 
-import sys, os, inspect, re, subprocess
+import sys, os, inspect, re
 import elasticsearch
+
 import migrates
+
+
 
 logger = migrates.Logger()
 
@@ -29,21 +32,22 @@ test_template = {
 
 
 
-@migrates.register('migration_0', '2017-01-01', 'Do a thing')
-class migration_0(object):
-    pass
-@migrates.register('migration_1', '2017-01-02', 'Do another thing')
-class migration_1(object):
-    pass
-@migrates.register('migration_2', '2017-01-03', 'Do yet another thing')
-class migration_2(object):
-    pass
-@migrates.register('migration_3', '2017-01-04', 'Do another thing entirely')
-class migration_3(object):
-    @staticmethod
-    def transform_templates(templates):
-        templates['migrates_test_template'] = test_template
-        return templates
+if __name__ != '__main__':
+    @migrates.register('migration_0', '2017-01-01', 'Do a thing')
+    class migration_0(object):
+        pass
+    @migrates.register('migration_1', '2017-01-02', 'Do another thing')
+    class migration_1(object):
+        pass
+    @migrates.register('migration_2', '2017-01-03', 'Do yet another thing')
+    class migration_2(object):
+        pass
+    @migrates.register('migration_3', '2017-01-04', 'Do another thing entirely')
+    class migration_3(object):
+        @staticmethod
+        def transform_templates(templates):
+            templates['migrates_test_template'] = test_template
+            return templates
 
 
 
@@ -78,14 +82,9 @@ Writing affected index information to path "(.+?)"\..*
 
 
 
-def call(args):
-    return subprocess.check_output([
-        'python -m migrates.__main__ ' + args
-    ], shell=True).decode('utf-8')
-
-
-
 def __main__():
+    from .test_utils import callmigrates, iterate_test_data
+    
     mig = migrates.Migrates()
     try:
         mig.connection.indices.delete_template('migrates_test_template')
@@ -94,22 +93,22 @@ def __main__():
     original_templates = mig.get_templates()
     
     logger.log('Testing migration registration and listing.')
-    migrations = call('migrations --path %s' % test_path)
+    migrations = callmigrates('migrations --path %s' % test_path)
     assert migrations_text in migrations
     
     logger.log('Testing history removal, recording, and listing.')
-    call('remove_history -y')
-    assert no_history_text in call('history')
-    run_migration = call('run --path %s -y' % test_path)
-    assert re.match(new_history_regex, call('history'))
-    call('remove_history -y')
-    assert no_history_text in call('history')
+    callmigrates('remove_history -y')
+    assert no_history_text in callmigrates('history')
+    run_migration = callmigrates('run --path %s -y' % test_path)
+    assert re.match(new_history_regex, callmigrates('history'))
+    callmigrates('remove_history -y')
+    assert no_history_text in callmigrates('history')
     
     logger.log('Testing history when running specified migrations.')
-    call('run migration_1 migration_2 --path %s -y' % test_path)
-    assert re.match(partial_history_regex, call('history'))
-    call('remove_history -y')
-    assert no_history_text in call('history')
+    callmigrates('run migration_1 migration_2 --path %s -y' % test_path)
+    assert re.match(partial_history_regex, callmigrates('history'))
+    callmigrates('remove_history -y')
+    assert no_history_text in callmigrates('history')
     
     logger.log('Verifying correctness of template migration.')
     updated_templates = mig.get_templates()
@@ -124,19 +123,19 @@ def __main__():
     indexes_path = migration_match.group(3)
     
     logger.log('Testing templates recovery.')
-    call('restore_templates "%s" --dry' % templates_path)
+    callmigrates('restore_templates "%s" --dry' % templates_path)
     assert 'migrates_test_template' in mig.get_templates()
-    call('restore_templates "%s" -y --no-history' % templates_path)
+    callmigrates('restore_templates "%s" -y --no-history' % templates_path)
     assert mig.get_templates() == original_templates
     # restore_templates normally creates a history entry -
     # make sure the --no-history flag produced the expected behavior.
-    assert no_history_text in call('history')
+    assert no_history_text in callmigrates('history')
     
     logger.log('Testing migration history recovery.')
-    call('restore_history "%s" --dry' % migrations_path)
-    assert no_history_text in call('history')
-    call('restore_history "%s" --y' % migrations_path)
-    assert re.match(new_history_regex, call('history'))
+    callmigrates('restore_history "%s" --dry' % migrations_path)
+    assert no_history_text in callmigrates('history')
+    callmigrates('restore_history "%s" --y' % migrations_path)
+    assert re.match(new_history_regex, callmigrates('history'))
     
     logger.log('All done!')
 

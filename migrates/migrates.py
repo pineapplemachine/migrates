@@ -120,6 +120,10 @@ class Migrates(object):
             raise ValueError('Found no migration with name "%s".' % name)
     
     @classmethod
+    def contains(cls, name):
+        return name in cls.registry
+    
+    @classmethod
     def register(cls, *args, **kwargs):
         """
         To be used as a decorator for registering some class as a migration.

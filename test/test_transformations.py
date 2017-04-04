@@ -8,6 +8,7 @@ import elasticsearch
 from elasticsearch import helpers as eshelpers
 
 import migrates
+from .test_utils import iterate_test_data
 
 
 
@@ -65,15 +66,6 @@ def insert_test_data(connection):
                     'x': i % 100, 'y': i % 100
                 }
             })
-
-def iterate_test_data(connection):
-    for document in eshelpers.scan(
-        client=connection,
-        preserve_order=True,
-        index='migrates_test_*',
-        query=migrates.Migrates.scan_query
-    ):
-        yield document
 
 def validate_test_template(connection):
     template = connection.indices.get_template('migrates_test_template')
