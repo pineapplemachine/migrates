@@ -1,9 +1,9 @@
 import sys, traceback
 from migrates import Logger
 
-import test_transformations
-import test_cli
-import test_reindex
+from . import test_transformations
+from . import test_cli
+from . import test_reindex
 
 tests = [
     ('test_transformations', test_transformations),

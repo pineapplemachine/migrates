@@ -125,10 +125,10 @@ def __main__():
     logger.log('Removing data from previous tests, if present.')
     remove_test_data(connection)
     
-    logger.log('Inserting test data into Elasticsearch.')
-    insert_test_data(connection)
-    
     try:
+        logger.log('Inserting test data into Elasticsearch.')
+        insert_test_data(connection)
+        
         mig = migrates.Migrates(connection)
         mig.logger.quiet = True
         

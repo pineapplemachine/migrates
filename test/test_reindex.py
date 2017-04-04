@@ -41,21 +41,26 @@ def __main__():
     logger.log('Removing old test data.')
     remove_test_data(connection)
     
-    logger.log('Inserting new test data.')
-    insert_test_data(connection)
-    
-    logger.log('Reindexing data back into the same index.')
-    callmigrates('reindex migrates_test_reindex -y')
-    
-    logger.log('Validating resulting data.')
-    validate_test_data(connection, index='migrates_test_reindex')
-    
-    logger.log('Reindexing data into a different index.')
-    callmigrates('reindex "migrates_test_reindex=>migrates_test_reindex_2" -y')
-    
-    logger.log('Validating resulting data.')
-    assert not connection.indices.exists('migrates_test_reindex')
-    validate_test_data(connection, index='migrates_test_reindex_2')
+    try:
+        logger.log('Inserting new test data.')
+        insert_test_data(connection)
+        
+        logger.log('Reindexing data back into the same index.')
+        callmigrates('reindex migrates_test_reindex -y')
+        
+        logger.log('Validating resulting data.')
+        validate_test_data(connection, index='migrates_test_reindex')
+        
+        logger.log('Reindexing data into a different index.')
+        callmigrates('reindex "migrates_test_reindex=>migrates_test_reindex_2" -y')
+        
+        logger.log('Validating resulting data.')
+        assert not connection.indices.exists('migrates_test_reindex')
+        validate_test_data(connection, index='migrates_test_reindex_2')
+
+    finally:
+        logger.log('Cleaing up test data.')
+        remove_test_data(connection)
 
 
 
