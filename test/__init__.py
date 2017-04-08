@@ -2,11 +2,13 @@ import sys, traceback
 from migrates import Logger
 
 from . import test_transformations
+from . import test_sequence
 from . import test_cli
 from . import test_reindex
 
 tests = [
     ('test_transformations', test_transformations),
+    ('test_sequence', test_sequence),
     ('test_cli', test_cli),
     ('test_reindex', test_reindex),
 ]

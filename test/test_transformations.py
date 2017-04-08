@@ -5,10 +5,9 @@ This is an automated test for verifying migration behavior and stability.
 from __future__ import division
 
 import elasticsearch
-from elasticsearch import helpers as eshelpers
 
 import migrates
-from .test_utils import iterate_test_data
+from .test_utils import iterate_test_data, remove_test_data
 
 
 
@@ -44,16 +43,6 @@ document_count = 1200
 
 
 
-def remove_test_data(connection):
-    try:
-        connection.indices.delete('migrates_test_*')
-    except elasticsearch.exceptions.NotFoundError:
-        pass
-    try:
-        connection.indices.delete_template('migrates_test_template')
-    except elasticsearch.exceptions.NotFoundError:
-        pass
-
 def insert_test_data(connection):
     with migrates.Batch(connection, migrates.Logger()) as batch:
         for i in range(0, document_count):
@@ -79,8 +68,8 @@ def remove_migration_history(connection):
 
 
 
-@migrates.register('migration_test_0', '2017-01-01')
-class migration_test_0(object):
+@migrates.register('migration_transform_test_0', '2017-01-01')
+class migration_transform_test_0(object):
     @staticmethod
     def transform_documents():
         def transform(doc):
@@ -90,8 +79,8 @@ class migration_test_0(object):
             'migrates_test_0': {'test_0': transform}
         }
 
-@migrates.register('migration_test_all', '2017-01-02')
-class migration_test_all(object):
+@migrates.register('migration_transform_test_all', '2017-01-02')
+class migration_transform_test_all(object):
     @staticmethod
     def transform_documents():
         def transform(doc):
@@ -105,8 +94,8 @@ class migration_test_all(object):
         templates['migrates_test_template'] = test_template
         return templates
 
-@migrates.register('migration_test_remove', '2017-01-02')
-class migration_test_remove(object):
+@migrates.register('migration_transform_test_remove', '2017-01-03')
+class migration_transform_test_remove(object):
     @staticmethod
     def transform_documents():
         return {
@@ -134,7 +123,7 @@ def __main__():
         
         logger.log('Testing a migration dry run.')
         mig.dry = True
-        mig.migrate([mig.get('migration_test_0'), mig.get('migration_test_all')])
+        mig.migrate([mig.get('migration_transform_test_0'), mig.get('migration_transform_test_all')])
         count = 0
         for doc in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x']
@@ -143,7 +132,7 @@ def __main__():
         
         logger.log('Testing migration applying to one index and document type.')
         mig.dry = False
-        mig.migrate([mig.get('migration_test_0')])
+        mig.migrate([mig.get('migration_transform_test_0')])
         count = 0
         for doc in iterate_test_data(connection):
             if doc['_index'] == 'migrates_test_0' and doc['_type'] == 'test_0':
@@ -154,7 +143,7 @@ def __main__():
         assert count == document_count
         
         logger.log('Testing migration applying to several indexes and document types.')
-        mig.migrate([mig.get('migration_test_all')])
+        mig.migrate([mig.get('migration_transform_test_all')])
         count = 0
         for doc in iterate_test_data(connection):
             assert doc['_source']['y'] == doc['_source']['x'] ** 2
@@ -163,7 +152,7 @@ def __main__():
         validate_test_template(connection)
         
         logger.log('Testing migration for removing documents.')
-        mig.migrate([mig.get('migration_test_remove')])
+        mig.migrate([mig.get('migration_transform_test_remove')])
         for doc in iterate_test_data(connection):
             assert False
         

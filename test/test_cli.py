@@ -26,7 +26,7 @@ test_template = {
                 "x": {"type": "integer"},
                 "y": {"type": "integer"}
             }
-        },
+        }
     }
 }
 

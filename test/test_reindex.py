@@ -1,7 +1,7 @@
 import elasticsearch
 
 import migrates
-from .test_utils import callmigrates, iterate_test_data
+from .test_utils import callmigrates, iterate_test_data, remove_test_data
 
 
 
@@ -19,12 +19,6 @@ def insert_test_data(connection):
                 '_id': str(i),
                 '_source': {'x': i}
             })
-
-def remove_test_data(connection):
-    try:
-        connection.indices.delete('migrates_test_*')
-    except elasticsearch.exceptions.NotFoundError:
-        pass
 
 def validate_test_data(connection, index):
     docs = set()
