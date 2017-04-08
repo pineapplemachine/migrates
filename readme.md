@@ -91,7 +91,7 @@ class my_first_migration(object):
         # individual documents.
         # Here's a transformation function to be applied to documents.
         def transform(doc):
-            doc['_source']['x'] = doc['_source']['y'] ** 2
+            doc['_source']['y'] = doc['_source']['x'] ** 2
             return doc
         # Apply that transformation to documents in indexes matching the pattern
         # "my_index_*" and to all document types.
