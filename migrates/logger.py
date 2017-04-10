@@ -25,9 +25,10 @@ class Logger(object):
     For logging messages to the console and, optionally, to a log file.
     """
     
-    def __init__(self, path=None, verbose=False, quiet=False, yes=False):
+    def __init__(self, path=None, verbose=False, quiet=False, silent=False, yes=False):
         self.verbose = verbose
         self.quiet = quiet
+        self.silent = silent
         self.yes = yes
         self.path = None
         self.output_file = None
@@ -52,6 +53,7 @@ class Logger(object):
     
     def show(self, stdout, text, *args):
         """Log a line of text."""
+        stdout = stdout and not self.silent
         if stdout or self.output_file is not None:
             formatted = text % args if args else text
         if stdout:
@@ -116,7 +118,7 @@ class Logger(object):
     
     def wait(self, seconds):
         """Wait for a given number of seconds."""
-        if self.quiet:
+        if self.quiet or self.silent:
             time.sleep(seconds)
         else:
             print('Waiting for %d seconds...' % seconds)

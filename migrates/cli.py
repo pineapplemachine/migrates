@@ -152,6 +152,7 @@ class Arguments(object):
         parser.add_argument('-V', '--version', action='store_true')
         parser.add_argument('--no-history', action='store_true')
         parser.add_argument('--log', type=str, default='')
+        parser.add_argument('--silent', action='store_true')
         # Advanced options
         parser.add_argument('--history-template', type=str,
             default=migrates.Migrates.default_history_template
