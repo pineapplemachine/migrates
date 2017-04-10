@@ -79,6 +79,28 @@ MigratesFailState.NoRecoveryNeeded = (
 
 
 
+class MigratesResult(object):
+    """
+    Returned by a call to the `Migrates.migrate` method. Contains information
+    about the process and whether it succeeded or failed.
+    """
+    def __init__(
+        self, migrations, timestamp, fail_state, exception, dry, no_history,
+        restore_templates_path, restore_indexes_path, restore_migrations_path
+    ):
+        self.migrations = migrations
+        self.timestamp = timestamp
+        self.fail_state = fail_state
+        self.exception = exception
+        self.dry = dry
+        self.no_history = no_history
+        self.restore_templates_path = restore_templates_path
+        self.restore_indexes_path = restore_indexes_path
+        self.restore_migrations_path = restore_migrations_path
+        self.success = fail_state is None
+        
+
+
 class Migrates(object):
     """
     Contains a registry of known migrations and implements the migration process.
@@ -86,6 +108,7 @@ class Migrates(object):
     
     FailState = MigratesFailState
     IndexDetail = MigratesIndexDetail
+    Result = MigratesResult
     
     registry = {}  # Will contain Migration objects
     
@@ -543,6 +566,17 @@ class Migrates(object):
             self.log('Finished migration dry run.')
         else:
             self.log('Migration completed successfully!')
+        return self.Result(
+            migrations=self.migrations,
+            timestamp=self.timestamp,
+            fail_state=None,
+            exception=None,
+            dry=self.dry,
+            no_history=self.no_history,
+            restore_templates_path=self.restore_templates_path,
+            restore_indexes_path=self.restore_indexes_path,
+            restore_migrations_path=self.restore_migrations_path,
+        )
 
     def get_affected_indexes(self):
         """
@@ -785,6 +819,22 @@ class Migrates(object):
     
     def handle_migration_failure(self, state, exception):
         self.log_exception(state.message, exception=exception)
+        recovery_success = True
+        def recovery_action(*call_methods):
+            self.log(
+                'Please do not terminate the process before recovery is complete.'
+            )
+            success = True
+            for call_method in call_methods:
+                try:
+                    call_method()
+                except BaseException:
+                    self.log_exception('Failed to perform recovery action.')
+                    success = False
+            if success:
+                self.log('Recovery complete.')
+            else:
+                self.error('Recovery failed.')
         if self.dry:
             self.log(
                 'Migration dry run failed; '
@@ -801,33 +851,25 @@ class Migrates(object):
                 'indexes may have been created.'
             )
             if not self.keep_dummies:
-                self.log(
-                    'Please do not terminate the process before recovery is complete.'
-                )
-            self.remove_dummy_indexes()
-            self.log('Recovery complete.')
+                recovery_action(lambda: self.remove_dummy_indexes())
         elif state is self.FailState.PersistTemplates:
             self.log(
                 'Elasticsearch templates may have been modified and '
                 'dummy indexes may have been created.'
             )
-            self.log(
-                'Please do not terminate the process before recovery is complete.'
+            recovery_action(
+                lambda: self.remove_dummy_indexes(),
+                lambda: self.revert_template_migration()
             )
-            self.remove_dummy_indexes()
-            self.revert_template_migration()
-            self.log('Recovery complete.')
         elif state is self.FailState.MigrateDocuments:
             self.log(
                 'Elasticsearch templates and indexes may have been modified '
                 'and dummy indexes may have been created.'
             )
-            self.log(
-                'Please do not terminate the process before recovery is complete.'
+            recovery_action(
+                lambda: self.revert_template_migration(),
+                lambda: self.revert_indexes_migration()
             )
-            self.revert_template_migration()
-            self.revert_indexes_migration()
-            self.log('Recovery complete.')
         elif state is self.FailState.WriteHistory:
             self.log('No recovery action will be taken.')
             self.important(
@@ -837,6 +879,17 @@ class Migrates(object):
             )
         else:
             self.log('No recovery action will be taken.')
+        return self.Result(
+            migrations=self.migrations,
+            timestamp=self.timestamp,
+            fail_state=state,
+            exception=exception,
+            dry=self.dry,
+            no_history=self.no_history,
+            restore_templates_path=self.restore_templates_path,
+            restore_indexes_path=self.restore_indexes_path,
+            restore_migrations_path=self.restore_migrations_path,
+        )
     
     def revert_indexes_migration(self):
         try:
