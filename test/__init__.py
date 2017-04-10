@@ -5,12 +5,14 @@ from . import test_transformations
 from . import test_sequence
 from . import test_cli
 from . import test_reindex
+from . import test_index_failure
 
 tests = [
     ('test_transformations', test_transformations),
     ('test_sequence', test_sequence),
     ('test_cli', test_cli),
     ('test_reindex', test_reindex),
+    ('test_index_failure', test_index_failure),
 ]
 
 
