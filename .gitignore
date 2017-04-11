@@ -92,3 +92,6 @@ ENV/
 migrates/restore/
 logs/
 wip/
+migrates.indexes.*.json
+migrates.templates.*.json
+migrates.migrations.*.json
