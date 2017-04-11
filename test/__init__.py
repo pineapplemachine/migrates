@@ -6,6 +6,7 @@ from . import test_sequence
 from . import test_cli
 from . import test_reindex
 from . import test_index_failure
+from . import test_template_failure
 
 tests = [
     ('test_transformations', test_transformations),
@@ -13,6 +14,7 @@ tests = [
     ('test_cli', test_cli),
     ('test_reindex', test_reindex),
     ('test_index_failure', test_index_failure),
+    ('test_template_failure', test_template_failure),
 ]
 
 
